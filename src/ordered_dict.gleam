@@ -27,7 +27,10 @@ pub fn new() -> OrderedDict(k, v) {
 pub fn from_list(entries: List(#(k, v))) -> OrderedDict(k, v) {
   let #(d, rev) = {
     use #(map, rev_order), #(key, val) <- list.fold(entries, #(dict.new(), []))
-    #(dict.insert(map, key, val), [key, ..rev_order])
+    #(dict.insert(map, key, val), [
+      key,
+      ..list.filter(rev_order, fn(k) { k != key })
+    ])
   }
   OrderedDict(d, list.reverse(rev))
 }
@@ -89,7 +92,8 @@ pub fn is_empty(o_dict: OrderedDict(k, v)) -> Bool {
 
 /// Inserts a value into the dict with the given key as the first item.
 ///
-/// If the dict already has a value for the given key then the value is replaced with the new value.
+/// If the dict already has a value for the given key then the value is replaced with the new value,
+/// and the index updated.
 /// 
 /// ## Examples
 /// 
@@ -103,12 +107,16 @@ pub fn prepend(
   for key: k,
   value val: v,
 ) -> OrderedDict(k, v) {
-  OrderedDict(dict.insert(o_dict.map, key, val), [key, ..o_dict.order])
+  OrderedDict(dict.insert(o_dict.map, key, val), [
+    key,
+    ..list.filter(o_dict.order, fn(k) { k != key })
+  ])
 }
 
 /// Inserts a value into the dict with the given key as the last item.
 ///
-/// If the dict already has a value for the given key then the value is replaced with the new value.
+/// If the dict already has a value for the given key then the value is replaced with the new value,
+/// and the index updated.
 /// 
 /// ## Examples
 /// 
@@ -124,13 +132,14 @@ pub fn insert_end(
 ) -> OrderedDict(k, v) {
   OrderedDict(
     dict.insert(o_dict.map, key, val),
-    list.append(o_dict.order, [key]),
+    list.append(list.filter(o_dict.order, fn(k) { k != key }), [key]),
   )
 }
 
 /// Inserts a value into the dict with the given key and position.
 ///
-/// If the dict already has a value for the given key then the value is replaced with the new value.
+/// If the dict already has a value for the given key then the value is replaced with the new value,
+/// and the index updated.
 /// 
 /// ## Examples
 /// 
@@ -145,11 +154,12 @@ pub fn insert(
   for key: k,
   value val: v,
 ) -> OrderedDict(k, v) {
+  let filter = fn(l) { list.filter(l, fn(k) { k != key }) }
   OrderedDict(dict.insert(o_dict.map, key, val), case
     list.split(o_dict.order, index)
   {
-    #(pre, []) -> list.append(pre, [key])
-    #(pre, post) -> list.append(pre, [key, ..post])
+    #(pre, []) -> list.append(filter(pre), [key])
+    #(pre, post) -> list.append(pre, [key, ..filter(post)])
   })
 }
 
@@ -565,6 +575,7 @@ pub fn to_list_indexed(o_dict: OrderedDict(k, v)) -> List(#(Int, k, v)) {
       _ -> #(out, i)
     }
   }.0
+  |> list.reverse
 }
 
 /// Gets a list of all keys in a given ordered dict in order.
@@ -578,6 +589,20 @@ pub fn to_list_indexed(o_dict: OrderedDict(k, v)) -> List(#(Int, k, v)) {
 ///
 pub fn keys(o_dict: OrderedDict(k, v)) -> List(k) {
   list.filter(o_dict.order, dict.has_key(o_dict.map, _))
+}
+
+/// Gets an ordered list of all values in a given ordered dict.
+///
+/// ## Examples
+///
+/// ```gleam
+/// from_list([#("a", 0), #("b", 1)]) |> values
+/// // -> [0, 1]
+/// ```
+///
+pub fn values(o_dict: OrderedDict(k, v)) -> List(v) {
+  use #(_, val) <- list.map(to_list(o_dict))
+  val
 }
 
 /// Get the internal unordered dict

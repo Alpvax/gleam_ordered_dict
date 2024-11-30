@@ -625,7 +625,7 @@ pub fn fold(
 ///
 /// let dict = from_list([#("a", "apple"), #("b", "banana"), #("c", "cherry")])
 ///
-/// each(dict, fn(k, v) {
+/// each(dict, fn(k, v, _i) {
 ///   io.println(key <> " => " <> value)
 /// })
 /// // -> Nil
@@ -633,9 +633,6 @@ pub fn fold(
 /// // b => banana
 /// // c => cherry
 /// ```
-///
-/// The order of elements in the iteration is an implementation detail that
-/// should not be relied upon.
 ///
 pub fn each(o_dict: OrderedDict(k, v), fun: fn(k, v, Int) -> a) -> Nil {
   fold(o_dict, Nil, fn(nil, k, v, i) {

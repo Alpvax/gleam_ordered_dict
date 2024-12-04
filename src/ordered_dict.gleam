@@ -659,7 +659,7 @@ pub fn fold(
 /// // c => cherry
 /// ```
 ///
-pub fn each(o_dict: OrderedDict(k, v), fun: fn(k, v, Int) -> a) -> Nil {
+pub fn each(o_dict: OrderedDict(k, v), do fun: fn(k, v, Int) -> a) -> Nil {
   fold(o_dict, Nil, fn(nil, k, v, i) {
     fun(k, v, i)
     nil

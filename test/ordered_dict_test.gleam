@@ -23,6 +23,20 @@ pub fn from_list_test() {
   |> should.equal(od.from_list([#(2, 1), #(1, 2)]))
 }
 
+pub fn to_list_test() {
+  let l = [#("a", 0), #("b", 1), #("c", 2)]
+  od.from_list(l)
+  |> od.to_list
+  |> should.equal(l)
+}
+
+pub fn to_list_indexed_test() {
+  let l = [#("a", 0), #("b", 1), #("c", 2)]
+  od.from_list(l)
+  |> od.to_list_indexed
+  |> should.equal([#(0, "a", 0), #(1, "b", 1), #(2, "c", 2)])
+}
+
 pub fn has_key_test() {
   []
   |> od.from_list
